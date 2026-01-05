@@ -11,6 +11,7 @@ from pathlib import Path
 class UserState:
     """User state from database."""
     user_id: int
+    language: str | None
     agreed_at: int | None
     verified_at: int | None
     attempts_count: int
@@ -38,6 +39,7 @@ class Database:
         await self._conn.executescript("""
             CREATE TABLE IF NOT EXISTS users (
                 user_id INTEGER PRIMARY KEY,
+                language TEXT NULL,
                 agreed_at INTEGER NULL,
                 verified_at INTEGER NULL,
                 attempts_count INTEGER NOT NULL DEFAULT 0,
@@ -51,6 +53,14 @@ class Database:
                 value TEXT NOT NULL
             );
         """)
+        
+        # Migration: add language column if missing (for existing databases)
+        try:
+            await self._conn.execute("ALTER TABLE users ADD COLUMN language TEXT NULL")
+            await self._conn.commit()
+        except Exception:
+            pass  # Column already exists
+        
         await self._conn.commit()
     
     async def close(self) -> None:
@@ -68,8 +78,11 @@ class Database:
         ) as cursor:
             row = await cursor.fetchone()
             if row:
+                # Handle missing language column in old DBs
+                lang = row["language"] if "language" in row.keys() else None
                 return UserState(
                     user_id=row["user_id"],
+                    language=lang,
                     agreed_at=row["agreed_at"],
                     verified_at=row["verified_at"],
                     attempts_count=row["attempts_count"],
@@ -90,6 +103,20 @@ class Database:
         # Now fetch the user (guaranteed to exist)
         user = await self.get_user(user_id)
         return user
+    
+    async def get_language(self, user_id: int) -> str | None:
+        """Get user's selected language."""
+        user = await self.get_user(user_id)
+        return user.language if user else None
+    
+    async def set_language(self, user_id: int, language: str) -> None:
+        """Set user's language preference."""
+        await self._conn.execute(
+            """INSERT INTO users (user_id, language) VALUES (?, ?)
+               ON CONFLICT(user_id) DO UPDATE SET language = ?""",
+            (user_id, language, language)
+        )
+        await self._conn.commit()
     
     async def set_agreed(self, user_id: int) -> None:
         """Mark user as agreed to rules."""
@@ -250,4 +277,3 @@ class Database:
         async with self._conn.execute("SELECT COUNT(*) as cnt FROM users") as cursor:
             row = await cursor.fetchone()
             return row["cnt"] if row else 0
-

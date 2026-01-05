@@ -6,6 +6,7 @@ from aiogram import Router, F
 from aiogram.types import ChatJoinRequest
 
 from src import texts
+from src.texts import get_text
 from src.db import Database
 from src.config import Config
 
@@ -32,6 +33,9 @@ async def on_join_request(request: ChatJoinRequest, db: Database, config: Config
     # Record the join request time
     await db.set_join_request_time(user_id)
     
+    # Get user's language (default to English if not set)
+    lang = await db.get_language(user_id) or "en"
+    
     # Check lockdown mode
     lockdown = await db.get_lockdown()
     if lockdown:
@@ -40,7 +44,7 @@ async def on_join_request(request: ChatJoinRequest, db: Database, config: Config
             await request.decline()
             await request.bot.send_message(
                 user_id,
-                texts.DECLINED_VERIFY_FIRST,
+                get_text(texts.DECLINED_VERIFY_FIRST, lang),
                 parse_mode="Markdown"
             )
         except Exception as e:
@@ -61,7 +65,7 @@ async def on_join_request(request: ChatJoinRequest, db: Database, config: Config
             # DM welcome message
             await request.bot.send_message(
                 user_id,
-                texts.APPROVED,
+                get_text(texts.APPROVED, lang),
                 parse_mode="Markdown"
             )
         except Exception as e:
@@ -77,7 +81,7 @@ async def on_join_request(request: ChatJoinRequest, db: Database, config: Config
                 await request.decline()
                 await request.bot.send_message(
                     user_id,
-                    texts.DECLINED_VERIFY_FIRST,
+                    get_text(texts.DECLINED_VERIFY_FIRST, lang),
                     parse_mode="Markdown"
                 )
             except Exception as e:
@@ -86,4 +90,3 @@ async def on_join_request(request: ChatJoinRequest, db: Database, config: Config
             # Soft mode: leave pending for manual approval
             logger.info(f"Soft mode: leaving user {user_id} pending for manual approval")
             # Don't do anything - request stays pending
-

@@ -8,6 +8,7 @@ from aiogram import Router, F
 from aiogram.types import CallbackQuery
 
 from src import texts, keyboards
+from src.texts import get_text
 from src.db import Database
 from src.config import Config
 
@@ -33,9 +34,11 @@ def _check_rate_limit(user_id: int) -> bool:
 _active_challenges: dict[int, str] = {}
 
 
-def _get_random_challenge() -> tuple[str, str, str]:
-    """Get a random captcha challenge. Returns (en_text, ru_text, correct_emoji)."""
-    return random.choice(texts.CAPTCHA_CHALLENGES)
+def _get_random_challenge(lang: str) -> tuple[str, str]:
+    """Get a random captcha challenge. Returns (challenge_text, correct_emoji)."""
+    challenge_en, challenge_ru, emoji = random.choice(texts.CAPTCHA_CHALLENGES)
+    challenge_text = challenge_en if lang == "en" else challenge_ru
+    return challenge_text, emoji
 
 
 @router.callback_query(F.data == "lobby:join")
@@ -49,21 +52,24 @@ async def on_join(callback: CallbackQuery, db: Database) -> None:
     
     logger.info(f"User {user_id} tapped Join")
     
+    # Get user's language
+    lang = await db.get_language(user_id) or "en"
+    
     # Check if in cooldown first
     in_cooldown, remaining = await db.is_in_cooldown(user_id)
     if in_cooldown:
         minutes = (remaining // 60) + 1
         await callback.message.edit_text(
-            texts.CAPTCHA_COOLDOWN.format(minutes=minutes),
-            reply_markup=keyboards.cooldown_keyboard(),
+            get_text(texts.CAPTCHA_COOLDOWN, lang).format(minutes=minutes),
+            reply_markup=keyboards.cooldown_keyboard(lang),
             parse_mode="Markdown"
         )
         await callback.answer()
         return
     
     await callback.message.edit_text(
-        texts.WELCOME_RULES,
-        reply_markup=keyboards.agree_keyboard(),
+        get_text(texts.WELCOME_RULES, lang),
+        reply_markup=keyboards.agree_keyboard(lang),
         parse_mode="Markdown"
     )
     await callback.answer()
@@ -80,13 +86,16 @@ async def on_agree(callback: CallbackQuery, db: Database) -> None:
     
     logger.info(f"User {user_id} agreed to rules")
     
+    # Get user's language
+    lang = await db.get_language(user_id) or "en"
+    
     # Check cooldown
     in_cooldown, remaining = await db.is_in_cooldown(user_id)
     if in_cooldown:
         minutes = (remaining // 60) + 1
         await callback.message.edit_text(
-            texts.CAPTCHA_COOLDOWN.format(minutes=minutes),
-            reply_markup=keyboards.cooldown_keyboard(),
+            get_text(texts.CAPTCHA_COOLDOWN, lang).format(minutes=minutes),
+            reply_markup=keyboards.cooldown_keyboard(lang),
             parse_mode="Markdown"
         )
         await callback.answer()
@@ -96,11 +105,11 @@ async def on_agree(callback: CallbackQuery, db: Database) -> None:
     await db.set_agreed(user_id)
     
     # Generate captcha challenge
-    challenge_en, challenge_ru, correct_emoji = _get_random_challenge()
+    challenge_text, correct_emoji = _get_random_challenge(lang)
     _active_challenges[user_id] = correct_emoji
     
     await callback.message.edit_text(
-        texts.CAPTCHA_INTRO.format(challenge_en=challenge_en, challenge_ru=challenge_ru),
+        get_text(texts.CAPTCHA_INTRO, lang).format(challenge=challenge_text),
         reply_markup=keyboards.captcha_keyboard(correct_emoji),
         parse_mode="Markdown"
     )
@@ -108,7 +117,7 @@ async def on_agree(callback: CallbackQuery, db: Database) -> None:
 
 
 @router.callback_query(F.data == "lobby:cancel")
-async def on_cancel(callback: CallbackQuery) -> None:
+async def on_cancel(callback: CallbackQuery, db: Database) -> None:
     """User cancels - show cancelled message."""
     user_id = callback.from_user.id
     
@@ -118,11 +127,14 @@ async def on_cancel(callback: CallbackQuery) -> None:
     
     logger.info(f"User {user_id} cancelled")
     
+    # Get user's language
+    lang = await db.get_language(user_id) or "en"
+    
     # Clear any active challenge
     _active_challenges.pop(user_id, None)
     
     await callback.message.edit_text(
-        texts.CANCELLED,
+        get_text(texts.CANCELLED, lang),
         parse_mode="Markdown"
     )
     await callback.answer()
@@ -142,13 +154,16 @@ async def on_captcha_answer(callback: CallbackQuery, db: Database, config: Confi
     
     logger.info(f"User {user_id} selected {selected_emoji}, correct is {correct_emoji}")
     
+    # Get user's language
+    lang = await db.get_language(user_id) or "en"
+    
     # Check cooldown first
     in_cooldown, remaining = await db.is_in_cooldown(user_id)
     if in_cooldown:
         minutes = (remaining // 60) + 1
         await callback.message.edit_text(
-            texts.CAPTCHA_COOLDOWN.format(minutes=minutes),
-            reply_markup=keyboards.cooldown_keyboard(),
+            get_text(texts.CAPTCHA_COOLDOWN, lang).format(minutes=minutes),
+            reply_markup=keyboards.cooldown_keyboard(lang),
             parse_mode="Markdown"
         )
         await callback.answer()
@@ -157,14 +172,14 @@ async def on_captcha_answer(callback: CallbackQuery, db: Database, config: Confi
     # No active challenge (maybe bot restarted)
     if not correct_emoji:
         # Regenerate captcha
-        challenge_en, challenge_ru, correct_emoji = _get_random_challenge()
+        challenge_text, correct_emoji = _get_random_challenge(lang)
         _active_challenges[user_id] = correct_emoji
         await callback.message.edit_text(
-            texts.CAPTCHA_INTRO.format(challenge_en=challenge_en, challenge_ru=challenge_ru),
+            get_text(texts.CAPTCHA_INTRO, lang).format(challenge=challenge_text),
             reply_markup=keyboards.captcha_keyboard(correct_emoji),
             parse_mode="Markdown"
         )
-        await callback.answer("Session expired, please try again.")
+        await callback.answer("Session expired, please try again." if lang == "en" else "Сессия истекла, попробуй снова.")
         return
     
     if selected_emoji == correct_emoji:
@@ -174,10 +189,10 @@ async def on_captcha_answer(callback: CallbackQuery, db: Database, config: Confi
         await db.set_verified(user_id)
         
         await callback.message.edit_text(
-            texts.CAPTCHA_SUCCESS.format(invite_link=config.join_request_invite_link),
+            get_text(texts.CAPTCHA_SUCCESS, lang).format(invite_link=config.join_request_invite_link),
             parse_mode="Markdown"
         )
-        await callback.answer("✅ Correct!")
+        await callback.answer("✅ Correct!" if lang == "en" else "✅ Верно!")
     else:
         # Wrong answer
         count, cooldown_until = await db.increment_attempts(
@@ -190,27 +205,27 @@ async def on_captcha_answer(callback: CallbackQuery, db: Database, config: Confi
             _active_challenges.pop(user_id, None)
             minutes = (config.cooldown_seconds // 60)
             await callback.message.edit_text(
-                texts.CAPTCHA_COOLDOWN.format(minutes=minutes),
-                reply_markup=keyboards.cooldown_keyboard(),
+                get_text(texts.CAPTCHA_COOLDOWN, lang).format(minutes=minutes),
+                reply_markup=keyboards.cooldown_keyboard(lang),
                 parse_mode="Markdown"
             )
-            await callback.answer("❌ Too many attempts!")
+            await callback.answer("❌ Too many attempts!" if lang == "en" else "❌ Слишком много попыток!")
         else:
             # Can try again
             remaining = config.max_attempts - count
             logger.info(f"User {user_id} wrong answer, {remaining} attempts left")
             
             # Generate new challenge
-            challenge_en, challenge_ru, correct_emoji = _get_random_challenge()
+            challenge_text, correct_emoji = _get_random_challenge(lang)
             _active_challenges[user_id] = correct_emoji
             
             await callback.message.edit_text(
-                texts.CAPTCHA_WRONG.format(remaining=remaining) + "\n\n" + 
-                texts.CAPTCHA_INTRO.format(challenge_en=challenge_en, challenge_ru=challenge_ru),
+                get_text(texts.CAPTCHA_WRONG, lang).format(remaining=remaining) + "\n\n" + 
+                get_text(texts.CAPTCHA_INTRO, lang).format(challenge=challenge_text),
                 reply_markup=keyboards.captcha_keyboard(correct_emoji),
                 parse_mode="Markdown"
             )
-            await callback.answer("❌ Wrong!")
+            await callback.answer("❌ Wrong!" if lang == "en" else "❌ Неверно!")
 
 
 @router.callback_query(F.data == "lobby:check_cooldown")
@@ -222,17 +237,21 @@ async def on_check_cooldown(callback: CallbackQuery, db: Database) -> None:
         await callback.answer()
         return
     
+    # Get user's language
+    lang = await db.get_language(user_id) or "en"
+    
     in_cooldown, remaining = await db.is_in_cooldown(user_id)
     
     if in_cooldown:
         minutes = (remaining // 60) + 1
-        await callback.answer(f"Please wait {minutes} more minute(s)")
+        msg = f"Please wait {minutes} more minute(s)" if lang == "en" else f"Подожди ещё {minutes} мин"
+        await callback.answer(msg)
     else:
         # Cooldown over, show rules again
         logger.info(f"User {user_id} cooldown expired")
         await callback.message.edit_text(
-            texts.WELCOME_RULES,
-            reply_markup=keyboards.agree_keyboard(),
+            get_text(texts.WELCOME_RULES, lang),
+            reply_markup=keyboards.agree_keyboard(lang),
             parse_mode="Markdown"
         )
-        await callback.answer("You can try again now!")
+        await callback.answer("You can try again now!" if lang == "en" else "Можешь попробовать снова!")

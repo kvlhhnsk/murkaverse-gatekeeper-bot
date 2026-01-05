@@ -1,37 +1,46 @@
 """
 Bilingual copy for Murkaverse Gatekeeper Bot.
-All messages are EN then RU, separated by ————
+All texts are dictionaries with "en" and "ru" keys.
 Theme: dreamy, playful, light — dreams, sparkles, moons, cat paws
 """
 
+# --- Language Selection ---
+
+LANGUAGE_SELECT = """🌐 *Choose your language*
+
+Please select your preferred language:
+
+🌐 *Выбери язык*
+
+Пожалуйста, выбери предпочитаемый язык:"""
+
 # --- Welcome & Rules ---
 
-WELCOME_START = """🌙 *Hey there, dreamer!*
+WELCOME_START = {
+    "en": """🌙 *Hey there, dreamer!*
 
 Welcome to Murkaverse ✨
 
-Tap below to begin your journey.
-
-————
-
-🌙 *Привет, мечтатель!*
+Tap below to begin your journey.""",
+    
+    "ru": """🌙 *Привет, мечтатель!*
 
 Добро пожаловать в Murkaverse ✨
 
 Нажми ниже, чтобы начать путешествие."""
+}
 
-WELCOME_RULES = """🐾 *Almost there, dreamer!*
+WELCOME_RULES = {
+    "en": """🐾 *Almost there, dreamer!*
 
 Just a few simple rules before you enter:
 
 ✨ Be kind to fellow dreamers
 ✨ No spam or self-promo
 ✨ Keep it cozy and stick to the theme of dreams or the Murkaverse project in general
-✨ English in General, other topics include English and Russian language versions
-
-————
-
-🐾 *Почти все, мечтатель!*
+✨ English in General, other topics include English and Russian language versions""",
+    
+    "ru": """🐾 *Почти все, мечтатель!*
 
 Несколько простых правил:
 
@@ -39,30 +48,53 @@ Just a few simple rules before you enter:
 ✨ Без спама и саморекламы
 ✨ Сохраняй уют и придерживайся темы снов или проекта Муркаверс в общем
 ✨ Английский в General, другие темы включают английскую и русскую версии"""
+}
 
 # --- Buttons ---
 
-BTN_JOIN = "🌙 Enter Murkaverse / Войти в Муркаверс"
-BTN_AGREE = "🐾 I agree / Согласен"
-BTN_CANCEL = "✨ Later / Позже"
-BTN_TRY_AGAIN = "🌙 Try again / Ещё раз"
-BTN_TRY_LATER = "✨ Try later / Позже"
+BTN_LANG_EN = "🇬🇧 English"
+BTN_LANG_RU = "🇷🇺 Русский"
+
+BTN_JOIN = {
+    "en": "🌙 Enter Murkaverse",
+    "ru": "🌙 Войти в Муркаверс"
+}
+
+BTN_AGREE = {
+    "en": "🐾 I agree",
+    "ru": "🐾 Согласен"
+}
+
+BTN_CANCEL = {
+    "en": "✨ Later",
+    "ru": "✨ Позже"
+}
+
+BTN_TRY_AGAIN = {
+    "en": "🌙 Try again",
+    "ru": "🌙 Ещё раз"
+}
+
+BTN_TRY_LATER = {
+    "en": "✨ Try later",
+    "ru": "✨ Попробовать позже"
+}
 
 # --- Captcha ---
 
-CAPTCHA_INTRO = """🐾 *Quick Verification!*
+CAPTCHA_INTRO = {
+    "en": """🐾 *Quick Verification!*
 
 Just making sure you're a real dreamer, not a bot ✨
 
-{challenge_en}
-
-————
-
-🐾 *Быстрая проверка!*
+{challenge}""",
+    
+    "ru": """🐾 *Быстрая проверка!*
 
 Убедимся, что ты настоящий мечтатель ✨
 
-{challenge_ru}"""
+{challenge}"""
+}
 
 # Challenge templates: (english_text, russian_text, correct_emoji)
 CAPTCHA_CHALLENGES = [
@@ -76,7 +108,8 @@ CAPTCHA_CHALLENGES = [
 # Decoy emojis (used to fill wrong answers)
 CAPTCHA_DECOYS = ["🌸", "🦋", "🍃", "☁️", "🫧", "🪷", "🌿", "🧸", "💫", "🌷", "🪻", "🐚"]
 
-CAPTCHA_SUCCESS = """✨ *Welcome to Murkaverse, dreamer!*
+CAPTCHA_SUCCESS = {
+    "en": """✨ *Welcome to Murkaverse, dreamer!*
 
 You're all set to join 🌙
 
@@ -85,11 +118,9 @@ You're all set to join 🌙
 2. You'll be approved in seconds
 3. English in General, other topics include English and Russian language versions
 
-{invite_link}
-
-————
-
-✨ *Добро пожаловать в Муркаверс, мечтатель!*
+{invite_link}""",
+    
+    "ru": """✨ *Добро пожаловать в Муркаверс, мечтатель!*
 
 Присоединяйся к группе Муркаверс 🌙
 
@@ -99,55 +130,55 @@ You're all set to join 🌙
 3. Английский в General, другие темы включают английскую и русскую версии
 
 {invite_link}"""
+}
 
-CAPTCHA_WRONG = """🌙 *Oops, wrong one!*
+CAPTCHA_WRONG = {
+    "en": """🌙 *Oops, wrong one!*
 
 Try again, dreamer ✨
-Attempts left: {remaining}
-
-————
-
-🌙 *Упс, не то!*
+Attempts left: {remaining}""",
+    
+    "ru": """🌙 *Упс, не то!*
 
 Попробуй ещё, мечтатель ✨
 Осталось попыток: {remaining}"""
+}
 
-CAPTCHA_COOLDOWN = """💤 *Take a little nap...*
+CAPTCHA_COOLDOWN = {
+    "en": """💤 *Take a little nap...*
 
-Too many tries! Wait {minutes} min and try again 🌙
-
-————
-
-💤 *Немного подремли...*
+Too many tries! Wait {minutes} min and try again 🌙""",
+    
+    "ru": """💤 *Немного подремли...*
 
 Слишком много попыток! Подожди {minutes} мин 🌙"""
+}
 
 # --- Cancelled ---
 
-CANCELLED = """✨ *No worries, dreamer!*
+CANCELLED = {
+    "en": """✨ *No worries, dreamer!*
 
-Come back anytime — just tap /start
-
-————
-
-✨ *Без проблем, мечтатель!*
+Come back anytime — just tap /start""",
+    
+    "ru": """✨ *Без проблем, мечтатель!*
 
 Возвращайся когда захочешь — нажми /start"""
+}
 
 # --- Join Request Approved ---
 
-APPROVED = """🐾 *You're in, dreamer!*
+APPROVED = {
+    "en": """🐾 *You're in, dreamer!*
 
 Welcome to Murkaverse ✨
 
 🌙 English in General
 🌙 Other topics include English and Russian language versions
 
-See you inside! 💫
-
-————
-
-🐾 *Ты внутри, мечтатель!*
+See you inside! 💫""",
+    
+    "ru": """🐾 *Ты внутри, мечтатель!*
 
 Добро пожаловать в Муркаверс ✨
 
@@ -155,24 +186,25 @@ See you inside! 💫
 🌙 Другие темы включают английскую и русскую версии
 
 До встречи! 💫"""
+}
 
 # --- Strict Mode Decline ---
 
-DECLINED_VERIFY_FIRST = """🌙 *One moment, dreamer!*
+DECLINED_VERIFY_FIRST = {
+    "en": """🌙 *One moment, dreamer!*
 
 Please complete the verification first ✨
 
-Tap /start to begin.
-
-————
-
-🌙 *Секундочку, мечтатель!*
+Tap /start to begin.""",
+    
+    "ru": """🌙 *Секундочку, мечтатель!*
 
 Сначала пройди проверку ✨
 
 Нажми /start чтобы начать."""
+}
 
-# --- Admin Messages ---
+# --- Admin Messages (English only) ---
 
 ADMIN_LOCKDOWN_ON = "🔒 Lockdown ON. All join requests will be declined."
 ADMIN_LOCKDOWN_OFF = "🔓 Lockdown OFF. Dreams flowing again."
@@ -197,8 +229,16 @@ ADMIN_HELP = """🐾 *Admin Commands*
 
 # --- Errors ---
 
-ERROR_GENERIC = """🌙 Something went wrong... Try again?
+ERROR_GENERIC = {
+    "en": "🌙 Something went wrong... Try again?",
+    "ru": "🌙 Что-то пошло не так... Попробуй ещё раз?"
+}
 
-————
 
-🌙 Что-то пошло не так... Попробуй ещё раз?"""
+# --- Helper function ---
+
+def get_text(text_dict: dict | str, lang: str) -> str:
+    """Get text for specified language. Falls back to English if not found."""
+    if isinstance(text_dict, str):
+        return text_dict
+    return text_dict.get(lang, text_dict.get("en", ""))

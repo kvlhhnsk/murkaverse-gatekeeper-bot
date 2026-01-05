@@ -5,21 +5,32 @@ import random
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from src import texts
+from src.texts import get_text
 
 
-def join_keyboard() -> InlineKeyboardMarkup:
-    """Keyboard for initial /start (no deep link)."""
+def language_keyboard() -> InlineKeyboardMarkup:
+    """Keyboard for language selection."""
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text=texts.BTN_JOIN, callback_data="lobby:join")]
+        [
+            InlineKeyboardButton(text=texts.BTN_LANG_EN, callback_data="lang:en"),
+            InlineKeyboardButton(text=texts.BTN_LANG_RU, callback_data="lang:ru"),
+        ]
     ])
 
 
-def agree_keyboard() -> InlineKeyboardMarkup:
+def join_keyboard(lang: str) -> InlineKeyboardMarkup:
+    """Keyboard for initial /start (after language selected)."""
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text=get_text(texts.BTN_JOIN, lang), callback_data="lobby:join")]
+    ])
+
+
+def agree_keyboard(lang: str) -> InlineKeyboardMarkup:
     """Keyboard for rules agreement."""
     return InlineKeyboardMarkup(inline_keyboard=[
         [
-            InlineKeyboardButton(text=texts.BTN_AGREE, callback_data="lobby:agree"),
-            InlineKeyboardButton(text=texts.BTN_CANCEL, callback_data="lobby:cancel"),
+            InlineKeyboardButton(text=get_text(texts.BTN_AGREE, lang), callback_data="lobby:agree"),
+            InlineKeyboardButton(text=get_text(texts.BTN_CANCEL, lang), callback_data="lobby:cancel"),
         ]
     ])
 
@@ -49,16 +60,15 @@ def captcha_keyboard(correct_emoji: str) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=[buttons])
 
 
-def try_again_keyboard() -> InlineKeyboardMarkup:
+def try_again_keyboard(lang: str) -> InlineKeyboardMarkup:
     """Keyboard shown after wrong captcha answer."""
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text=texts.BTN_TRY_AGAIN, callback_data="lobby:join")]
+        [InlineKeyboardButton(text=get_text(texts.BTN_TRY_AGAIN, lang), callback_data="lobby:join")]
     ])
 
 
-def cooldown_keyboard() -> InlineKeyboardMarkup:
+def cooldown_keyboard(lang: str) -> InlineKeyboardMarkup:
     """Keyboard shown during cooldown."""
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text=texts.BTN_TRY_LATER, callback_data="lobby:check_cooldown")]
+        [InlineKeyboardButton(text=get_text(texts.BTN_TRY_LATER, lang), callback_data="lobby:check_cooldown")]
     ])
-
