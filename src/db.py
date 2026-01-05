@@ -81,23 +81,15 @@ class Database:
     
     async def ensure_user(self, user_id: int) -> UserState:
         """Get user state, creating if doesn't exist."""
-        user = await self.get_user(user_id)
-        if user:
-            return user
-        
+        # Use INSERT OR IGNORE to handle race conditions
         await self._conn.execute(
-            "INSERT INTO users (user_id) VALUES (?)", (user_id,)
+            "INSERT OR IGNORE INTO users (user_id) VALUES (?)", (user_id,)
         )
         await self._conn.commit()
-        return UserState(
-            user_id=user_id,
-            agreed_at=None,
-            verified_at=None,
-            attempts_count=0,
-            attempts_window_start=None,
-            cooldown_until=None,
-            last_join_request_at=None,
-        )
+        
+        # Now fetch the user (guaranteed to exist)
+        user = await self.get_user(user_id)
+        return user
     
     async def set_agreed(self, user_id: int) -> None:
         """Mark user as agreed to rules."""
