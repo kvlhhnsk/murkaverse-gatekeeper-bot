@@ -9,19 +9,32 @@ from aiogram.filters import CommandStart, CommandObject
 from src import texts, keyboards
 from src.texts import get_text
 from src.db import Database
+from src.config import Config
 
 logger = logging.getLogger(__name__)
 router = Router(name="start")
 
 
 @router.message(CommandStart(deep_link=True))
-async def start_deep_link(message: Message, command: CommandObject, db: Database) -> None:
+async def start_deep_link(message: Message, command: CommandObject, db: Database, config: Config) -> None:
     """Handle /start with deep link (e.g., ?start=join)."""
     user_id = message.from_user.id
     logger.info(f"User {user_id} started with deep link: {command.args}")
     
     # Ensure user exists in DB
-    await db.ensure_user(user_id)
+    user = await db.ensure_user(user_id)
+    
+    # Check if user is already verified
+    user = await db.get_user(user_id)
+    if user and user.verified_at:
+        # Already verified - show welcome back with invite link
+        lang = user.language or "en"
+        logger.info(f"User {user_id} already verified, showing welcome back")
+        await message.answer(
+            get_text(texts.WELCOME_BACK, lang).format(invite_link=config.join_request_invite_link),
+            parse_mode="Markdown"
+        )
+        return
     
     # Check if user has selected a language
     lang = await db.get_language(user_id)
@@ -43,13 +56,25 @@ async def start_deep_link(message: Message, command: CommandObject, db: Database
 
 
 @router.message(CommandStart())
-async def start_normal(message: Message, db: Database) -> None:
+async def start_normal(message: Message, db: Database, config: Config) -> None:
     """Handle normal /start without deep link."""
     user_id = message.from_user.id
     logger.info(f"User {user_id} started normally")
     
     # Ensure user exists in DB
     await db.ensure_user(user_id)
+    
+    # Check if user is already verified
+    user = await db.get_user(user_id)
+    if user and user.verified_at:
+        # Already verified - show welcome back with invite link
+        lang = user.language or "en"
+        logger.info(f"User {user_id} already verified, showing welcome back")
+        await message.answer(
+            get_text(texts.WELCOME_BACK, lang).format(invite_link=config.join_request_invite_link),
+            parse_mode="Markdown"
+        )
+        return
     
     # Check if user has selected a language
     lang = await db.get_language(user_id)

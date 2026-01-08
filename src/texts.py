@@ -6,13 +6,39 @@ Theme: dreamy, playful, light — dreams, sparkles, moons, cat paws
 
 # --- Language Selection ---
 
-LANGUAGE_SELECT = """🌐 *Choose your language*
+LANGUAGE_SELECT = """🌙 *Welcome to Murkaverse*
 
-Please select your preferred language:
+This is a place where dreams live,
+where symbols we often overlook appear,
+and where questions long left unanswered can be explored.
 
-🌐 *Выбери язык*
+Murkaverse is a community built around Murka,
+a friendly AI companion
+for interpreting dreams, symbols,
+and gentle self-reflection.
 
-Пожалуйста, выбери предпочитаемый язык:"""
+Take a step inside.
+Complete verification to join ✨
+
+━━━━━━━━━━━━
+
+🌙 *Добро пожаловать в Murkaverse*
+
+Здесь живут сны,
+знаки, которые мы часто не замечаем,
+и вопросы, на которые давно ищем ответы.
+
+Murkaverse — это сообщество вокруг Мурки,
+дружелюбного AI-компаньона
+для толкования снов, символов
+и бережной саморефлексии.
+
+Сделай шаг внутрь.
+Пройди проверку, чтобы присоединиться ✨
+
+━━━━━━━━━━━━
+
+🌐 *Choose your language / Выбери язык*"""
 
 # --- Welcome & Rules ---
 
@@ -23,11 +49,15 @@ Welcome to Murkaverse ✨
 
 Tap below to begin your journey.""",
     
-    "ru": """🌙 *Привет, мечтатель!*
+    "ru": """🌙 *Добро пожаловать в Murkaverse*
 
-Добро пожаловать в Murkaverse ✨
+Murkaverse — это сообщество вокруг Мурки,
+дружелюбного AI-компаньона
+для толкования снов, символов
+и бережной саморефлексии.
 
-Нажми ниже, чтобы начать путешествие."""
+Сделай шаг внутрь.
+Пройди проверку, чтобы присоединиться ✨"""
 }
 
 WELCOME_RULES = {
@@ -40,7 +70,7 @@ Just a few simple rules before you enter:
 ✨ Keep it cozy and stick to the theme of dreams or the Murkaverse project in general
 ✨ English in General, other topics include English and Russian language versions""",
     
-    "ru": """🐾 *Почти все, мечтатель!*
+    "ru": """🐾 *Почти все!*
 
 Несколько простых правил:
 
@@ -111,7 +141,7 @@ CAPTCHA_DECOYS = ["🌸", "🦋", "🍃", "☁️", "🫧", "🪷", "🌿", "�
 CAPTCHA_SUCCESS = {
     "en": """✨ *Welcome to Murkaverse, dreamer!*
 
-You're all set to join 🌙
+You're all set to join 🌙 Click the link below to enter the group!
 
 🐾 *Next steps:*
 1. Tap the link below → "Request to Join"
@@ -120,9 +150,9 @@ You're all set to join 🌙
 
 {invite_link}""",
     
-    "ru": """✨ *Добро пожаловать в Муркаверс, мечтатель!*
+    "ru": """✨ *Добро пожаловать в Муркаверс, соня!*
 
-Присоединяйся к группе Муркаверс 🌙
+Присоединяйся к группе Муркаверс 🌙 Нажми на ссылку снизу, чтобы пройти в группу!
 
 🐾 *Что дальше:*
 1. Нажми на ссылку, чтобы войти в группу!
@@ -140,7 +170,7 @@ Attempts left: {remaining}""",
     
     "ru": """🌙 *Упс, не то!*
 
-Попробуй ещё, мечтатель ✨
+Попробуй ещё раз!
 Осталось попыток: {remaining}"""
 }
 
@@ -161,9 +191,9 @@ CANCELLED = {
 
 Come back anytime — just tap /start""",
     
-    "ru": """✨ *Без проблем, мечтатель!*
+    "ru": """✨ *Без проблем, возвращайся как передумаешь!*
 
-Возвращайся когда захочешь — нажми /start"""
+Нажми /start когда будешь готов(а)."""
 }
 
 # --- Join Request Approved ---
@@ -178,7 +208,7 @@ Welcome to Murkaverse ✨
 
 See you inside! 💫""",
     
-    "ru": """🐾 *Ты внутри, мечтатель!*
+    "ru": """🐾 *Победа, проходи!*
 
 Добро пожаловать в Муркаверс ✨
 
@@ -197,7 +227,7 @@ Please complete the verification first ✨
 
 Tap /start to begin.""",
     
-    "ru": """🌙 *Секундочку, мечтатель!*
+    "ru": """🌙 *Секундочку!*
 
 Сначала пройди проверку ✨
 
@@ -226,6 +256,22 @@ ADMIN_HELP = """🐾 *Admin Commands*
 /lockdown on|off — Emergency mode
 /mode soft|strict — Verification mode
 /status — Stats and status"""
+
+# --- Returning Verified User ---
+
+WELCOME_BACK = {
+    "en": """✨ *Welcome back, dreamer!*
+
+You're all set to join 🌙 Click the link below to enter the group!
+
+{invite_link}""",
+    
+    "ru": """✨ *Добро пожаловать обратно в Murkaverse, соня!*
+
+Нажми на ссылку снизу, чтобы пройти в группу 🌙
+
+{invite_link}"""
+}
 
 # --- Errors ---
 
